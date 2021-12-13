@@ -23,9 +23,6 @@ func main() {
 	// Register the messageCreate func as a callback for MessageCreate events.
 	discord.AddHandler(bot_control.MessageCreate)
 
-	// In this example, we only care about receiving message events.
-	discord.Identify.Intents = discordgo.IntentsGuildMessages
-
 	// Open a websocket connection to Discord and begin listening.
 	err = discord.Open()
 	if err != nil {

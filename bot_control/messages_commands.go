@@ -7,9 +7,33 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
+// function made to remove set member
+func remove_user(s *discordgo.Session, m *discordgo.MessageCreate, user string) {
+	// get all the members in the guild
+	guild_members, err := s.GuildMembers(m.Message.GuildID, "", 100)
+
+	if err != nil {
+		fmt.Println("Error retrieving guild members, ", err)
+		return
+	}
+
+	// check our user against a list of members and remove it if it matches
+	for _, member := range guild_members {
+		if user == member.User.Username {
+			// kick the user
+			s.GuildMemberDelete(m.GuildID, member.User.ID)
+			s.ChannelMessageSend(m.ChannelID, "Succesfully removed: " + member.User.Username)
+			return
+		}
+	}
+
+	// notiffy the Admin that the user was not found
+	s.ChannelMessageSend(m.ChannelID, "Could not find set user, please see if the username is correct!")
+}
+
 func channel_cleanup(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// get the channel message structure for the last 100 message <<100 is the max number allowed by Discord>>
-	channel_messages, err := s.ChannelMessages(m.ChannelID, 0, "", "", "")
+	channel_messages, err := s.ChannelMessages(m.ChannelID, 100, "", "", "")
 	channel_messages_ids := []string{}
 
 	// retain the ids of the message types in a slice
