@@ -1,6 +1,7 @@
 package bot_control
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/CrutoiAlexandru/Golang_moderator_discord_bot/config"
@@ -27,8 +28,28 @@ func MessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 	}
 
+	// Admin command to delete max 100 messages in a channel
 	if m.Content == "mod.channelcleanup" {
-		
+		// get the channel message structure for the last 100 message <<100 is the max number allowed by Discord>>
+		channel_messages, err := s.ChannelMessages(m.ChannelID, 100, "", "", "")
+		channel_messages_ids := []string{}
+
+		// retain the ids of the message types in a slice
+		for _, messages := range channel_messages {
+			channel_messages_ids = append(channel_messages_ids, messages.ID)
+		}
+
+		if err != nil {
+			fmt.Println("Error retrieving channel messages ids, ", err)
+			return 
+		}
+
+		// if the role of the message author is Admin continue deleting the latest 100 messages from current channel
+		for _, role := range m.Member.Roles {
+			if role == "919917532167688213"{
+				s.ChannelMessagesBulkDelete(m.ChannelID, channel_messages_ids)
+			}
+		}
 	}
 
 	// delete the message and kick the user if it contains this set of words
